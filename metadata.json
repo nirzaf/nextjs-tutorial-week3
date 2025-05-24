@@ -1,0 +1,5 @@
+{
+  "name": "React Basics Tutorial",
+  "description": "An interactive web application to learn the fundamentals of React, including components, JSX, props, state, hooks, event handling, conditional rendering, lists, forms, Context API, and React Router.",
+  "requestFramePermissions": []
+}
