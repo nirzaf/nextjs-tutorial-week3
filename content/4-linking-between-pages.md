@@ -8,11 +8,12 @@ The `Link` component is imported from `next/link` and wraps around your HTML ele
 
 ### Example: Basic Link Usage
 
-```javascript
-// pages/index.js
+```typescript
+// pages/index.tsx
+import React from 'react';
 import Link from 'next/link';
 
-export default function Home() {
+const Home: React.FC = () => {
   return (
     <div>
       <h1>Home Page</h1>
@@ -21,34 +22,40 @@ export default function Home() {
       </Link>
     </div>
   );
-}
+};
+
+export default Home;
 ```
 
 In Next.js 13 and later, the `Link` component automatically renders its children as a clickable link, so you don't need to wrap them in an `<a>` tag:
 
-```javascript
-// pages/index.js (Next.js 13+)
+```typescript
+// pages/index.tsx (Next.js 13+)
+import React from 'react';
 import Link from 'next/link';
 
-export default function Home() {
+const Home: React.FC = () => {
   return (
     <div>
       <h1>Home Page</h1>
       <Link href="/about">About Us</Link>
     </div>
   );
-}
+};
+
+export default Home;
 ```
 
 ## Linking to Dynamic Routes
 
 When linking to dynamic routes, you can pass the dynamic parameters in the `href` prop:
 
-```javascript
-// pages/index.js
+```typescript
+// pages/index.tsx
+import React from 'react';
 import Link from 'next/link';
 
-export default function Home() {
+const Home: React.FC = () => {
   return (
     <div>
       <h1>Blog Posts</h1>
@@ -62,12 +69,14 @@ export default function Home() {
       </ul>
     </div>
   );
-}
+};
+
+export default Home;
 ```
 
 For more complex URLs, you can use an object with `pathname` and `query` properties:
 
-```javascript
+```typescript
 <Link
   href={{
     pathname: '/blog/[id]',
@@ -82,17 +91,26 @@ For more complex URLs, you can use an object with `pathname` and `query` propert
 
 Sometimes you need to navigate programmatically, such as after form submission or based on certain conditions. You can use the `useRouter` hook from `next/router` for this purpose:
 
-```javascript
-// pages/login.js
+```typescript
+// pages/login.tsx
+import React, { useState, FormEvent } from 'react';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
 
-export default function Login() {
+// Define a type for the login function result
+type LoginResult = Promise<boolean>;
+
+// This would be your actual login function
+const performLogin = (username: string, password: string): LoginResult => {
+  // Implementation details
+  return Promise.resolve(true); // Placeholder
+};
+
+const Login: React.FC = () => {
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     // Perform login logic here
@@ -110,7 +128,9 @@ export default function Login() {
       <button type="submit">Login</button>
     </form>
   );
-}
+};
+
+export default Login;
 ```
 
 ## Advanced Link Features
@@ -119,7 +139,7 @@ export default function Login() {
 
 Shallow routing allows you to change the URL without running data fetching methods (like `getServerSideProps` or `getStaticProps`):
 
-```javascript
+```typescript
 router.push('/dashboard?page=2', undefined, { shallow: true });
 ```
 
@@ -127,7 +147,7 @@ router.push('/dashboard?page=2', undefined, { shallow: true });
 
 Next.js automatically prefetches links that appear in the viewport, improving performance. You can disable this behavior if needed:
 
-```javascript
+```typescript
 <Link href="/about" prefetch={false}>
   About Us
 </Link>
@@ -137,7 +157,7 @@ Next.js automatically prefetches links that appear in the viewport, improving pe
 
 By default, `Link` and `router.push()` add a new entry to the browser's history stack. If you want to replace the current URL instead, use the `replace` prop:
 
-```javascript
+```typescript
 <Link href="/about" replace>
   About Us
 </Link>
@@ -145,7 +165,7 @@ By default, `Link` and `router.push()` add a new entry to the browser's history 
 
 Or with the router:
 
-```javascript
+```typescript
 router.replace('/about');
 ```
 

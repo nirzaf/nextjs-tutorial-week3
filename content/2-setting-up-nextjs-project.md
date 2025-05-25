@@ -60,15 +60,19 @@ my-next-app/
 
 Next.js is designed to work out of the box with minimal configuration, but you can customize it using the `next.config.js` file:
 
-```javascript
-// next.config.js
-module.exports = {
+```typescript
+// next.config.ts
+import type { NextConfig } from 'next';
+
+const config: NextConfig = {
   reactStrictMode: true,  // Enable React strict mode
   images: {
     domains: ['example.com'],  // Allow images from this domain
   },
   // Other configuration options
-}
+};
+
+export default config;
 ```
 
 ## Adding TypeScript Support

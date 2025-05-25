@@ -22,16 +22,20 @@ my-next-app/
 
 You can reference images from the `public` directory in your components:
 
-```javascript
-// pages/index.js
-export default function Home() {
+```typescript
+// pages/index.tsx
+import React from 'react';
+
+const Home: React.FC = () => {
   return (
     <div>
       <h1>Welcome to My Website</h1>
       <img src="/images/logo.png" alt="Logo" width={200} height={100} />
     </div>
   );
-}
+};
+
+export default Home;
 ```
 
 ### Using the Image Component
@@ -45,11 +49,12 @@ Next.js provides an optimized `Image` component that automatically handles:
 
 To use the `Image` component:
 
-```javascript
-// pages/index.js
+```typescript
+// pages/index.tsx
+import React from 'react';
 import Image from 'next/image';
 
-export default function Home() {
+const Home: React.FC = () => {
   return (
     <div>
       <h1>Welcome to My Website</h1>
@@ -62,7 +67,9 @@ export default function Home() {
       />
     </div>
   );
-}
+};
+
+export default Home;
 ```
 
 The `priority` attribute is used for images that should be preloaded, such as those visible above the fold.
@@ -71,18 +78,22 @@ The `priority` attribute is used for images that should be preloaded, such as th
 
 To use external images with the `Image` component, you need to configure the domains in `next.config.js`:
 
-```javascript
-// next.config.js
-module.exports = {
+```typescript
+// next.config.ts
+import type { NextConfig } from 'next';
+
+const config: NextConfig = {
   images: {
     domains: ['example.com'],
   },
-}
+};
+
+export default config;
 ```
 
 Then you can use external images:
 
-```javascript
+```typescript
 <Image
   src="https://example.com/images/logo.png"
   alt="External Logo"

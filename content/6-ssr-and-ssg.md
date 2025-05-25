@@ -44,9 +44,21 @@ With SSG, HTML is generated at build time:
 
 Use `getStaticProps` to fetch data at build time:
 
-```javascript
-// pages/blog.js
-export default function Blog({ posts }) {
+```typescript
+// pages/blog.tsx
+import React from 'react';
+import { GetStaticProps } from 'next';
+
+type Post = {
+  id: string;
+  title: string;
+};
+
+type BlogProps = {
+  posts: Post[];
+};
+
+const Blog: React.FC<BlogProps> = ({ posts }) => {
   return (
     <div>
       <h1>Blog Posts</h1>
@@ -57,10 +69,10 @@ export default function Blog({ posts }) {
       </ul>
     </div>
   );
-}
+};
 
 // This function runs at build time
-export async function getStaticProps() {
+export const getStaticProps: GetStaticProps<BlogProps> = async () => {
   // Fetch data from an API
   const res = await fetch('https://api.example.com/posts');
   const posts = await res.json();
@@ -74,26 +86,41 @@ export async function getStaticProps() {
     // if a request comes in (Incremental Static Regeneration)
     revalidate: 10,
   };
-}
+};
+
+export default Blog;
 ```
 
 ## Dynamic Routes with getStaticPaths
 
 For dynamic routes using SSG, you need to specify which paths to pre-render:
 
-```javascript
-// pages/blog/[id].js
-export default function Post({ post }) {
+```typescript
+// pages/blog/[id].tsx
+import React from 'react';
+import { GetStaticProps, GetStaticPaths } from 'next';
+
+type Post = {
+  id: string;
+  title: string;
+  content: string;
+};
+
+type PostProps = {
+  post: Post;
+};
+
+const Post: React.FC<PostProps> = ({ post }) => {
   return (
     <div>
       <h1>{post.title}</h1>
       <p>{post.content}</p>
     </div>
   );
-}
+};
 
 // Specify which paths to pre-render
-export async function getStaticPaths() {
+export const getStaticPaths: GetStaticPaths = async () => {
   const res = await fetch('https://api.example.com/posts');
   const posts = await res.json();
 
@@ -109,11 +136,11 @@ export async function getStaticPaths() {
     // fallback: 'blocking' is similar to true but without the initial loading state
     fallback: false,
   };
-}
+};
 
 // Fetch data for each page
-export async function getStaticProps({ params }) {
-  const res = await fetch(`https://api.example.com/posts/${params.id}`);
+export const getStaticProps: GetStaticProps<PostProps, { id: string }> = async ({ params }) => {
+  const res = await fetch(`https://api.example.com/posts/${params?.id}`);
   const post = await res.json();
 
   return {
@@ -122,16 +149,48 @@ export async function getStaticProps({ params }) {
     },
     revalidate: 60, // Revalidate every minute
   };
-}
+};
+
+export default Post;
 ```
 
 ## Implementing SSR with getServerSideProps
 
 Use `getServerSideProps` to fetch data on each request:
 
-```javascript
-// pages/dashboard.js
-export default function Dashboard({ user, data }) {
+```typescript
+// pages/dashboard.tsx
+import React from 'react';
+import { GetServerSideProps } from 'next';
+import { IncomingMessage } from 'http';
+
+type User = {
+  id: string;
+  name: string;
+};
+
+type DashboardData = {
+  // Define your dashboard data structure
+  items: any[];
+};
+
+type DashboardProps = {
+  user: User;
+  data: DashboardData;
+};
+
+// This would be your actual functions
+const getUserFromCookie = (req: IncomingMessage): User => {
+  // Implementation details
+  return { id: '1', name: 'John Doe' }; // Placeholder
+};
+
+const fetchDashboardData = async (userId: string): Promise<DashboardData> => {
+  // Implementation details
+  return { items: [] }; // Placeholder
+};
+
+const Dashboard: React.FC<DashboardProps> = ({ user, data }) => {
   return (
     <div>
       <h1>Welcome, {user.name}</h1>
@@ -139,10 +198,10 @@ export default function Dashboard({ user, data }) {
       {/* Display dashboard data */}
     </div>
   );
-}
+};
 
 // This function runs on every request
-export async function getServerSideProps(context) {
+export const getServerSideProps: GetServerSideProps<DashboardProps> = async (context) => {
   // You can access request parameters, headers, cookies, etc.
   const { req, res, params, query } = context;
   
@@ -159,17 +218,43 @@ export async function getServerSideProps(context) {
       data,
     },
   };
-}
+};
+
+export default Dashboard;
 ```
 
 ## Incremental Static Regeneration (ISR)
 
 ISR allows you to update static pages after they've been built without rebuilding the entire site:
 
-```javascript
-// pages/products/[id].js
-export async function getStaticProps({ params }) {
-  const res = await fetch(`https://api.example.com/products/${params.id}`);
+```typescript
+// pages/products/[id].tsx
+import React from 'react';
+import { GetStaticProps, GetStaticPaths } from 'next';
+
+type Product = {
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+};
+
+type ProductPageProps = {
+  product: Product;
+};
+
+const ProductPage: React.FC<ProductPageProps> = ({ product }) => {
+  return (
+    <div>
+      <h1>{product.name}</h1>
+      <p>${product.price}</p>
+      <p>{product.description}</p>
+    </div>
+  );
+};
+
+export const getStaticProps: GetStaticProps<ProductPageProps, { id: string }> = async ({ params }) => {
+  const res = await fetch(`https://api.example.com/products/${params?.id}`);
   const product = await res.json();
 
   return {

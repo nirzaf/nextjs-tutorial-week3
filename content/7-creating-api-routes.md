@@ -6,9 +6,18 @@ Next.js allows you to create API endpoints as serverless functions within your a
 
 To create an API route, add a file to the `pages/api` directory:
 
-```javascript
-// pages/api/hello.js
-export default function handler(req, res) {
+```typescript
+// pages/api/hello.ts
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+type ResponseData = {
+  message: string;
+};
+
+export default function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<ResponseData>
+) {
   res.status(200).json({ message: 'Hello, API!' });
 }
 ```
@@ -24,16 +33,25 @@ The API handler function receives two parameters:
 
 ### Common Request Properties and Methods
 
-```javascript
+```typescript
 // req.method: HTTP method (GET, POST, etc.)
 // req.body: Request body (parsed by Next.js)
 // req.query: Query parameters
 // req.cookies: Cookies sent with the request
 // req.headers: Request headers
 
-export default function handler(req, res) {
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+type RequestData = {
+  data: any;
+};
+
+export default function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   const { name } = req.query;
-  const { data } = req.body;
+  const { data } = req.body as RequestData;
   
   console.log(`Method: ${req.method}`);
   console.log(`Query: ${JSON.stringify(req.query)}`);
@@ -45,14 +63,29 @@ export default function handler(req, res) {
 
 ### Common Response Methods
 
-```javascript
+```typescript
 // res.status(code): Set the status code
 // res.json(data): Send a JSON response
 // res.send(body): Send a response
 // res.redirect(url): Redirect to another URL
 // res.setHeader(name, value): Set a response header
 
-export default function handler(req, res) {
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+type SuccessResponse = {
+  success: true;
+  data: string;
+};
+
+type ErrorResponse = {
+  success: false;
+  error: string;
+};
+
+export default function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<SuccessResponse | ErrorResponse>
+) {
   res.status(200).json({ success: true, data: 'Some data' });
   
   // Or send an error
@@ -64,16 +97,43 @@ export default function handler(req, res) {
 
 You can handle different HTTP methods in the same API route:
 
-```javascript
-// pages/api/users.js
-export default function handler(req, res) {
+```typescript
+// pages/api/users.ts
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+type GetResponse = {
+  users: string[];
+};
+
+type PostResponse = {
+  message: string;
+};
+
+type PutResponse = {
+  message: string;
+};
+
+type DeleteResponse = {
+  message: string;
+};
+
+type ResponseData = GetResponse | PostResponse | PutResponse | DeleteResponse;
+
+type RequestBody = {
+  name?: string;
+};
+
+export default function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<ResponseData>
+) {
   switch (req.method) {
     case 'GET':
       // Handle GET request
       return res.status(200).json({ users: ['John', 'Jane'] });
     case 'POST':
       // Handle POST request
-      const { name } = req.body;
+      const { name } = req.body as RequestBody;
       return res.status(201).json({ message: `User ${name} created` });
     case 'PUT':
       // Handle PUT request

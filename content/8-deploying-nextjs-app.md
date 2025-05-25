@@ -199,21 +199,31 @@ docker run -p 3000:3000 my-next-app
 To ensure the best performance in production:
 
 1. **Enable output caching**:
-```javascript
-// next.config.js
-module.exports = {
+```typescript
+// next.config.ts
+import type { NextConfig } from 'next';
+
+const config: NextConfig = {
   output: 'standalone',
-}
+};
+
+export default config;
 ```
 
 2. **Implement ISR for dynamic content**:
-```javascript
-export async function getStaticProps() {
+```typescript
+import { GetStaticProps } from 'next';
+
+type PageProps = {
+  data: any;
+};
+
+export const getStaticProps: GetStaticProps<PageProps> = async () => {
   return {
     props: { data },
     revalidate: 60, // Revalidate every 60 seconds
   }
-}
+};
 ```
 
 3. **Use a CDN** for static assets and API caching
