@@ -1,63 +1,111 @@
 import { Topic } from './types';
 
 const markdownToHtml = (markdown: string): string => {
-  let html = markdown
+  // First, extract and save code blocks to prevent them from being processed by other rules
+  const codeBlocks: string[] = [];
+  let processedMarkdown = markdown.replace(/```([\s\S]*?)```/g, (match) => {
+    const id = `__CODE_BLOCK_${codeBlocks.length}__`;
+    codeBlocks.push(match);
+    return id;
+  });
+
+  // Process inline code (single backticks) and save them too
+  const inlineCode: string[] = [];
+  processedMarkdown = processedMarkdown.replace(/`([^`]+)`/g, (match, code) => {
+    const id = `__INLINE_CODE_${inlineCode.length}__`;
+    inlineCode.push(code);
+    return id;
+  });
+
+  // Process the rest of markdown
+  let html = processedMarkdown
     .replace(/^### (.*$)/gim, '<h3 class="text-xl font-semibold mb-2 text-sky-700">$1</h3>')
     .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold mb-3 text-sky-800">$1</h2>')
     .replace(/^# (.*$)/m, '<h1 class="text-3xl font-bold mb-4 text-sky-900">$1</h1>')
     .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
     .replace(/\*(.*?)\*/gim, '<em>$1</em>')
-    .replace(/`([^`]+)`/gim, '<code class="bg-gray-100 text-red-600 px-1 py-0.5 rounded text-sm">$1</code>')
     .replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2" class="text-blue-600 hover:underline">$1</a>')
-    .replace(/^- (.*$)/gim, '<li class="ml-4">$1</li>') // Simple list item
-    .replace(/^\s{2,}- (.*$)/gim, '<li class="ml-8">$1</li>') // Nested list item (simple)
-    .replace(/^\d+\. (.*$)/gim, '<li class="ml-4">$1</li>'); // Ordered list item
+    .replace(/^- (.*$)/gim, '<li class="ml-4">$1</li>')
+    .replace(/^\s{2,}- (.*$)/gim, '<li class="ml-8">$1</li>')
+    .replace(/^\d+\. (.*$)/gim, '<li class="ml-4">$1</li>');
 
-  // Wrap list items in ul/ol. This is a very basic heuristic.
+  // Wrap list items in ul/ol
   html = html.replace(/(<li>[\s\S]*?<\/li>)/g, (match) => {
-    // Determine if it's a sub-list based on indentation.
-    // This is overly simplistic for complex nested lists, but might work for provided content.
     if (match.includes('ml-8')) {
-        return `<ul class="list-disc list-inside ml-4">${match}</ul>`;
+      return `<ul class="list-disc list-inside ml-4">${match}</ul>`;
     }
     return `<ul class="list-disc list-inside mb-4 space-y-1">${match}</ul>`;
   });
+  
   // Clean up extra ul/ol wrapping
   html = html.replace(/<\/ul>\s*<ul/g, '');
 
-
-
+  // Handle blockquotes
   html = html.replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-gray-300 pl-4 italic my-4">$1</blockquote>');
 
-
+  // Handle paragraphs
   html = html.split('\n\n').map(paragraph => {
-      // Don't wrap if it's already a block element or code block
-      if (paragraph.startsWith('<h') || paragraph.startsWith('<ul') || paragraph.startsWith('<blockquote') || paragraph.startsWith('<pre') || paragraph.startsWith('<table')) {
-          return paragraph;
-      }
-      // Handle horizontal rule
-      if (paragraph.trim() === '---') {
-          return '<hr class="my-4" />';
-      }
-      return `<p class="mb-4">${paragraph}</p>`;
+    if (
+      paragraph.trim() === '' ||
+      paragraph.startsWith('<h') ||
+      paragraph.startsWith('<ul') ||
+      paragraph.startsWith('<blockquote') ||
+      paragraph.startsWith('<pre') ||
+      paragraph.startsWith('__CODE_BLOCK_') ||
+      paragraph.startsWith('<table')
+    ) {
+      return paragraph;
+    }
+    if (paragraph.trim() === '---') {
+      return '<hr class="my-4" />';
+    }
+    return `<p class="mb-4">${paragraph}</p>`;
   }).join('');
 
-
-  html = html.replace(/```(?:javascript|js|typescript|ts|bash|toml|dockerfile|css|html)\n([\s\S]*?)\n```/g, (match, p1) => {
-    const parts = match.split('\n');
-    const lang = parts[0].replace('```', '').trim();
-    const code = parts.slice(1, -1).join('\n');
-    return `<pre><code class="language-${lang}">${code}</code></pre>`;
+  // Restore inline code with proper HTML
+  inlineCode.forEach((code, i) => {
+    const escapedCode = code
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+    html = html.replace(
+      `__INLINE_CODE_${i}__`,
+      `<code class="bg-gray-100 text-red-600 px-1 py-0.5 rounded text-sm">${escapedCode}</code>`
+    );
   });
 
+  // Restore code blocks with proper HTML
+  codeBlocks.forEach((block, i) => {
+    // More comprehensive regex to handle various code block formats
+    const match = block.match(/```(?:(bash|javascript|js|typescript|ts|toml|dockerfile|css|html))?\s*\n([\s\S]*?)\n```/);
+    if (match) {
+      const lang = match[1] || '';
+      const code = match[2];
+      const escapedCode = code
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+      html = html.replace(
+        `__CODE_BLOCK_${i}__`,
+        `<pre><code class="language-${lang}">${escapedCode}</code></pre>`
+      );
+    } else {
+      // Just in case the regex didn't match
+      html = html.replace(`__CODE_BLOCK_${i}__`, block);
+    }
+  });
 
+  // Final cleanup
   html = html.replace(/<p class="mb-4">\s*<\/p>/g, '');
   html = html.replace(/<ul class="list-disc list-inside mb-4 space-y-1">\s*<\/ul>/g, '');
-  html = html.replace(/<hr class="my-4" \/>\s*<h/g, '<hr class="my-4" /><h'); // Fixes for HR + H
+  html = html.replace(/<hr class="my-4" \/>\s*<h/g, '<hr class="my-4" /><h');
 
   return html.trim();
 };
-
 
 const extractSection = (content: string, startMarker: string, endMarker: string = ''): string => {
   let startIndex = content.indexOf(startMarker);
@@ -74,8 +122,9 @@ const extractSection = (content: string, startMarker: string, endMarker: string 
 
 
 const getAllCodeBlocks = (content: string) => {
-  const matches = content.matchAll(/```(?:javascript|js|typescript|ts|bash|toml|dockerfile|css|html)\n([\s\S]*?)\n```/g);
-  return Array.from(matches).map(match => match[1].trim());
+  // Improved regex to better match code blocks with or without language specification
+  const matches = content.matchAll(/```(?:(bash|javascript|js|typescript|ts|toml|dockerfile|css|html))?\s*\n([\s\S]*?)\n```/g);
+  return Array.from(matches).map(match => match[2].trim());
 };
 
 
@@ -248,7 +297,7 @@ const processMarkdownFile = (fileName: string, content: string): Topic => {
   }
 
   // Fallback for interactive example if no specific activity found
-  if (interactiveExample.tasks.length === 0) {
+  if (!interactiveExample.tasks || interactiveExample.tasks.length === 0) {
     interactiveExample = {
       description: "Experiment with the concepts presented in this topic.",
       tasks: [
