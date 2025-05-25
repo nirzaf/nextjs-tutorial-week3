@@ -1,4 +1,4 @@
-import { Topic, ContentElement, HeaderElement } from './types';
+import { Topic } from './types';
 
 // const markdownToHtml = (markdown: string): string => {
 //   // First, extract and save code blocks to prevent them from being processed by other rules
@@ -122,16 +122,16 @@ const extractSection = (content: string, startMarker: string, endMarker: string 
 };
 
 
-const getAllCodeBlocks = (content: string) => {
+const getAllCodeBlocks = (content: string): string[] => {
   // Improved regex to better match code blocks with or without language specification
   const matches = content.matchAll(/```(?:(bash|javascript|js|typescript|ts|toml|dockerfile|css|html))?\s*\n([\s\S]*?)\n```/g);
   return Array.from(matches).map(match => match[2].trim());
 };
 
 
-const extractQuestionAndTask = (content: string) => {
+const extractQuestionAndTask = (content: string): { quizQuestion: string; exerciseTasks: { task: string; code: string; hint: string }[] } => {
   let quizQuestion = '';
-  let exerciseTasks: { task: string; code: string; hint: string }[] = [];
+  const exerciseTasks: { task: string; code: string; hint: string }[] = [];
 
   const questionsAndTasksBlock = extractSection(content, '## Questions & Tasks', '[Next:');
   if (!questionsAndTasksBlock) return { quizQuestion, exerciseTasks };
@@ -151,7 +151,7 @@ const extractQuestionAndTask = (content: string) => {
           exerciseTasks.push({
             task: currentTaskText.split('\n')[0].trim(),
             code: currentCodeBlock,
-            hint: 'Review the section\'s content for guidance.'
+            hint: "Review the section's content for guidance."
           });
           currentTaskText = '';
         }
@@ -173,7 +173,7 @@ const extractQuestionAndTask = (content: string) => {
         // If there's no code block immediately after, it's a text-only task.
         const nextLineIndex = lines.indexOf(line) + 1;
         if (nextLineIndex < lines.length && !lines[nextLineIndex].startsWith('```')) {
-            exerciseTasks.push({ task: currentTaskText, code: '', hint: 'Review the section\'s content for guidance.' });
+            exerciseTasks.push({ task: currentTaskText, code: '', hint: "Review the section's content for guidance." });
             currentTaskText = '';
         }
       }
@@ -194,7 +194,7 @@ const extractQuestionAndTask = (content: string) => {
 };
 
 
-const generateQuizOptions = (correctText: string, topicTitle: string) => {
+const generateQuizOptions = (correctText: string, topicTitle: string): { id: string; text: string }[] => {
   const options = [
     { id: "a", text: correctText },
     { id: "b", text: `An incorrect option related to ${topicTitle} (B)` },
@@ -211,7 +211,7 @@ const generateQuizOptions = (correctText: string, topicTitle: string) => {
 
 
 const processMarkdownFile = (fileName: string, content: string): Topic => {
-  const id = fileName.replace(/\.md$/, '').replace(/^\d+\-/, '').replace(/\./g, '-');
+  const id = fileName.replace(/\.md$/, '').replace(/^\d+-/, '').replace(/\./g, '-');
   const path = `/${id}`;
 
   const titleMatch = content.match(/^# (.*$)/m);
@@ -272,7 +272,7 @@ const processMarkdownFile = (fileName: string, content: string): Topic => {
 
   // Extract general code examples (all of them)
   const allCodeBlocks = getAllCodeBlocks(content);
-  let codeExample: Topic['codeExample'] = { description: "Illustrative code example(s) from this topic:", code: '', outputDescription: "The code demonstrates key concepts or functionality." };
+  const codeExample: Topic['codeExample'] = { description: "Illustrative code example(s) from this topic:", code: '', outputDescription: "The code demonstrates key concepts or functionality." };
   if (allCodeBlocks.length > 0) {
       codeExample.code = allCodeBlocks.join('\n\n/* --- Next Code Block --- */\n\n'); // Join all blocks
       if (allCodeBlocks.length === 1) {
@@ -350,7 +350,7 @@ const processMarkdownFile = (fileName: string, content: string): Topic => {
     interactiveExample,
     exercise,
     quiz,
-    keywords: keywords.map(k => k.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").toLowerCase()).filter(k => k.length > 2)
+    keywords: keywords.map(k => k.replace(/[.,/#$%^&*;:{}=_`~()-]/g, "").toLowerCase()).filter(k => k.length > 2) // Corrected Regex
   };
 };
 

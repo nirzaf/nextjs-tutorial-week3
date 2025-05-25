@@ -4,15 +4,15 @@ import { HashRouter, Routes, Route, useParams, Navigate, Link } from 'react-rout
 import { Navbar } from './components/Navbar';
 import { TopicView } from './components/TopicView';
 import { TOPICS_DATA, APP_TITLE } from './constants';
-import { Topic, ContentElement } from './types'; // Added ContentElement
+import { Topic } from './types'; // Import Topic
 import { CodeBlock } from './components/CodeBlock'; // Moved CodeBlock import to top
 
-const App: React.FC = () => {
+const App: React.FC = (): React.ReactElement => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
 
   // Enhanced search algorithm that searches in title, keywords, and explanation
-  const filteredTopics = TOPICS_DATA.filter(topic => {
+  const filteredTopics = TOPICS_DATA.filter((topic: Topic): boolean => {
     if (!searchTerm.trim()) return true;
     
     const searchTermLower = searchTerm.toLowerCase();
@@ -37,14 +37,14 @@ const App: React.FC = () => {
       const timer = setTimeout(() => {
         setIsSearching(false);
       }, 300);
-      return () => clearTimeout(timer);
+      return (): void => clearTimeout(timer);
     } else {
       setIsSearching(false);
     }
   }, [searchTerm]);
   
   // Function to clear search
-  const clearSearch = () => {
+  const clearSearch = (): void => {
     setSearchTerm('');
   };
 
@@ -109,7 +109,7 @@ const App: React.FC = () => {
   );
 };
 
-const WelcomePage: React.FC = () => {
+const WelcomePage: React.FC = (): React.ReactElement => {
   // Attempt to find a specific intro topic, e.g., by id 'what-is-nextjs' or use the first topic.
   const introTopic = TOPICS_DATA.find(t => t.id === 'what-is-nextjs') || TOPICS_DATA[0];
 
@@ -127,22 +127,6 @@ const WelcomePage: React.FC = () => {
   // For the purpose of this subtask (verification), we'll simplify to avoid a crash.
   // A proper fix would involve using ReactMarkdown here as well.
 
-  let explanationContent: React.ReactNode = <p>{introTopic.explanation}</p>;
-  if (typeof introTopic.explanation !== 'string') {
-    // This block is for the old structure, which is no longer the case.
-    // Kept for context, but `introTopic.explanation` is now string.
-    explanationContent = (introTopic.explanation as ContentElement[]).map((element, index) => {
-        switch (element.type) {
-          case 'paragraph':
-            return <p key={index} className="mb-4">{element.content}</p>;
-          // Add other cases as needed, or simplify further
-          default:
-            return <p key={index}>Unsupported content type in WelcomePage</p>;
-        }
-    });
-  }
-
-
   return (
      <div className="prose prose-invert max-w-none prose-h1:text-sky-400 prose-h2:text-sky-500 prose-a:text-sky-400 hover:prose-a:text-sky-300">
         <h1 className="text-4xl font-bold mb-6 text-sky-300">{introTopic.title}</h1>
@@ -150,10 +134,7 @@ const WelcomePage: React.FC = () => {
           Ideally, WelcomePage should also use ReactMarkdown if its explanation is markdown.
           For now, rendering the string directly or a simplified version to avoid crash.
         */}
-        {typeof introTopic.explanation === 'string' ?
-          (<div><p>{introTopic.explanation.substring(0, 300)}...</p> <Link to={`/topic/${introTopic.id}`} className="text-sky-400 hover:text-sky-300">Read more</Link></div>) :
-          (<div className="space-y-4">{explanationContent}</div>)
-        }
+        <div><p>{introTopic.explanation.substring(0, 300)}...</p> <Link to={`/topic/${introTopic.id}`} className="text-sky-400 hover:text-sky-300">Read more</Link></div>
         {introTopic.codeExample.code && (
             <div className="mt-6">
                 <h3 className="text-2xl font-semibold mb-2 text-sky-500">Quick Example</h3>
@@ -168,7 +149,7 @@ const WelcomePage: React.FC = () => {
   );
 };
 
-const TopicWrapper: React.FC = () => {
+const TopicWrapper: React.FC = (): React.ReactElement => {
   const { topicId } = useParams<{ topicId: string }>();
   const topic = TOPICS_DATA.find(t => t.id === topicId);
 

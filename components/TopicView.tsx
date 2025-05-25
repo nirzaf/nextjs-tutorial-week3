@@ -86,7 +86,7 @@ export const TopicView: React.FC<TopicViewProps> = ({ topic }) => {
         </code>
       );
     },
-    a: ({ node, href, children, ...props }) => (
+    a: ({ href, children, ...props }) => (
       <a
         href={href}
         className="text-emerald-400 hover:text-emerald-300 underline underline-offset-4 transition-colors"
@@ -100,37 +100,37 @@ export const TopicView: React.FC<TopicViewProps> = ({ topic }) => {
     h1: ({ children, ...props }) => (
       <h1 className="text-4xl font-bold text-white mb-2" {...props}>{children}</h1>
     ),
-    h2: ({ node, children, ...props }) => (
+    h2: ({ children, ...props }) => (
       <h2 className="text-2xl font-bold text-white mt-8 mb-3" {...props}>
         {children}
       </h2>
     ),
-    h3: ({ node, children, ...props }) => (
+    h3: ({ children, ...props }) => (
       <h3 className="text-xl font-bold text-white mt-6 mb-2" {...props}>
         {children}
       </h3>
     ),
-    p: ({ node, children, ...props }) => (
+    p: ({ children, ...props }) => (
       <p className="text-slate-300 mb-4 leading-relaxed" {...props}>
         {children}
       </p>
     ),
-    ul: ({ node, children, ...props }) => (
+    ul: ({ children, ...props }) => (
       <ul className="list-disc pl-6 mb-4 space-y-2" {...props}>
         {children}
       </ul>
     ),
-    ol: ({ node, children, ...props }) => (
+    ol: ({ children, ...props }) => (
       <ol className="list-decimal pl-6 mb-4 space-y-2" {...props}>
         {children}
       </ol>
     ),
-    li: ({ node, children, ...props }) => (
+    li: ({ children, ...props }) => (
       <li className="text-slate-300" {...props}>
         {children}
       </li>
     ),
-    blockquote: ({ node, children, ...props }) => (
+    blockquote: ({ children, ...props }) => (
       <blockquote
         className="border-l-4 border-emerald-500 pl-4 py-1 my-4 text-slate-300 italic"
         {...props}
@@ -138,24 +138,24 @@ export const TopicView: React.FC<TopicViewProps> = ({ topic }) => {
         {children}
       </blockquote>
     ),
-    table: ({ node, children, ...props }) => (
+    table: ({ children, ...props }) => (
       <div className="overflow-x-auto my-4">
         <table className="min-w-full divide-y divide-slate-700" {...props}>
           {children}
         </table>
       </div>
     ),
-    thead: ({ node, children, ...props }) => (
+    thead: ({ children, ...props }) => (
       <thead className="bg-slate-800/50" {...props}>
         {children}
       </thead>
     ),
-    tbody: ({ node, children, ...props }) => (
+    tbody: ({ children, ...props }) => (
       <tbody className="divide-y divide-slate-700" {...props}>
         {children}
       </tbody>
     ),
-    th: ({ node, children, ...props }) => (
+    th: ({ children, ...props }) => (
       <th
         className="px-4 py-2 text-left text-xs font-medium text-slate-300 uppercase tracking-wider"
         {...props}
@@ -163,7 +163,7 @@ export const TopicView: React.FC<TopicViewProps> = ({ topic }) => {
         {children}
       </th>
     ),
-    td: ({ node, children, ...props }) => (
+    td: ({ children, ...props }) => (
       <td className="px-4 py-2 text-sm text-slate-300" {...props}>
         {children}
       </td>

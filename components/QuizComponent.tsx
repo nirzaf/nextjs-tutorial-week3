@@ -6,17 +6,17 @@ interface QuizComponentProps {
   quiz: Quiz;
 }
 
-export const QuizComponent: React.FC<QuizComponentProps> = ({ quiz }) => {
+export const QuizComponent: React.FC<QuizComponentProps> = ({ quiz }): React.ReactElement => {
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleOptionSelect = (optionId: string) => {
+  const handleOptionSelect = (optionId: string): void => {
     if (!submitted) {
       setSelectedOptionId(optionId);
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (): void => {
     if (selectedOptionId) {
       setSubmitted(true);
     } else {
@@ -24,7 +24,7 @@ export const QuizComponent: React.FC<QuizComponentProps> = ({ quiz }) => {
     }
   };
 
-  const handleReset = () => {
+  const handleReset = (): void => {
     setSelectedOptionId(null);
     setSubmitted(false);
   };
@@ -35,7 +35,7 @@ export const QuizComponent: React.FC<QuizComponentProps> = ({ quiz }) => {
     <div className="p-6 bg-slate-700/30 rounded-lg shadow-md">
       <p className="text-xl font-medium mb-4 text-gray-100">{quiz.question}</p>
       <div className="space-y-3 mb-6">
-        {quiz.options.map((option: QuizOption) => (
+        {quiz.options.map((option: QuizOption): React.ReactElement => (
           <button
             key={option.id}
             onClick={() => handleOptionSelect(option.id)}
