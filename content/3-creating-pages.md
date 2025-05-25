@@ -157,7 +157,7 @@ You've learned how to create pages in Next.js using its file-based routing syste
 - Create nested routes
 - Implement dynamic routes
 - Customize the 404 page
-- Use the `_app.js` file for global configurations
+- Use the `_app.tsx` file for global configurations
 
 In the next section, we'll learn how to link between pages in Next.js.
 
