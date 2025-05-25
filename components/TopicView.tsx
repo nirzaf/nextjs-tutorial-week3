@@ -45,7 +45,7 @@ const CodeBlockWrapper: React.FC<CodeBlockWrapperProps> = ({ node, inline, class
 
 export const TopicView: React.FC<TopicViewProps> = ({ topic }) => {
   return (
-    <article className="prose prose-invert max-w-none prose-h1:text-sky-400 prose-h2:text-sky-500 prose-h3:text-sky-600 prose-a:text-sky-400 hover:prose-a:text-sky-300 prose-strong:text-sky-300 prose-code:bg-slate-700 prose-code:p-1 prose-code:rounded prose-code:text-sm prose-code:text-emerald-300 prose-pre:bg-slate-900 prose-pre:p-4 prose-pre:rounded-md">
+    <article className="prose prose-invert max-w-none hover:prose-a:text-sky-300">
       <header className="mb-8 pb-4 border-b border-slate-700">
         <h1 className="text-4xl font-extrabold tracking-tight text-sky-300">{topic.title}</h1>
       </header>

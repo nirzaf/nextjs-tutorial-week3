@@ -16,13 +16,18 @@
     "react-dom": "^19.1.0",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.6.0",
+    "react-syntax-highlighter": "^15.6.1",
     "remark-gfm": "^4.0.1"
-    "react-syntax-highlighter": "^15.6.1"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.7",
+    "@tailwindcss/typography": "^0.5.16",
     "@types/node": "^22.14.0",
     "@types/react-syntax-highlighter": "*",
+    "autoprefixer": "^10.4.21",
     "gh-pages": "^6.3.0",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.1.7",
     "typescript": "~5.7.2",
     "vite": "^6.2.0"
   }
