@@ -77,27 +77,28 @@ const markdownToHtml = (markdown: string): string => {
   });
 
   // Restore code blocks with proper HTML
-  codeBlocks.forEach((block, i) => {
-    // More comprehensive regex to handle various code block formats
-    const match = block.match(/```(?:(bash|javascript|js|typescript|ts|toml|dockerfile|css|html))?\s*\n([\s\S]*?)\n```/);
-    if (match) {
-      const lang = match[1] || '';
-      const code = match[2];
-      const escapedCode = code
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-      html = html.replace(
-        `__CODE_BLOCK_${i}__`,
-        `<pre><code class="language-${lang}">${escapedCode}</code></pre>`
-      );
-    } else {
-      // Just in case the regex didn't match
-      html = html.replace(`__CODE_BLOCK_${i}__`, block);
-    }
-  });
+// Updated code for handling code blocks
+codeBlocks.forEach((block, i) => {
+  const match = block.match(/```(?:(bash|javascript|js|typescript|ts|toml|dockerfile|css|html))?\s*\n([\s\S]*?)\n```/);
+  if (match) {
+    const lang = match[1] || '';  // The language identifier (bash, javascript, etc.)
+    const code = match[2];
+    const escapedCode = code
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+    html = html.replace(
+      `__CODE_BLOCK_${i}__`,
+      `<pre><code class="language-${lang}">${escapedCode}</code></pre>`
+    );
+  } else {
+    // Just in case the regex didn't match
+    html = html.replace(`__CODE_BLOCK_${i}__`, block);
+  }
+});
+
 
   // Final cleanup
   html = html.replace(/<p class="mb-4">\s*<\/p>/g, '');
@@ -424,7 +425,7 @@ Next.js provides a simple way to create a new project with all the necessary con
 
 1. **Install Next.js** using the following command:
 
-   \`\`\`bash
+   \`\`\`nodejs
    npx create-next-app@latest my-next-app
    \`\`\`
 
