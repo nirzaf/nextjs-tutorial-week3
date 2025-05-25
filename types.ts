@@ -66,7 +66,7 @@ export interface Topic {
   id: string;
   title: string;
   path: string;
-  explanation: ContentElement[];
+  explanation: string;
   codeExample: {
     description?: string;
     code: string;

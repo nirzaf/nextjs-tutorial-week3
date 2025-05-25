@@ -108,139 +108,6 @@ import { Topic, ContentElement, HeaderElement } from './types';
 //   return html.trim();
 // };
 
-const parseMarkdownToStructuredData = (markdown: string): ContentElement[] => {
-  const elements: ContentElement[] = [];
-  const lines = markdown.split('\n');
-  let i = 0;
-
-  while (i < lines.length) {
-    const line = lines[i];
-
-    // Headers
-    if (line.startsWith('#')) {
-      let level = 0;
-      while (line[level] === '#') {
-        level++;
-      }
-      if (level > 0 && level <= 6 && line[level] === ' ') {
-        elements.push({
-          type: 'header',
-          level: level as HeaderElement['level'],
-          content: line.substring(level + 1).trim(),
-        });
-        i++;
-        continue;
-      }
-    }
-
-    // Horizontal Rule
-    if (line.match(/^(\-\-\-|\*\*\*|___)$/)) {
-      elements.push({ type: 'hr' });
-      i++;
-      continue;
-    }
-
-    // Fenced Code Blocks
-    if (line.startsWith('```')) {
-      const langMatch = line.match(/^```(\S*)/);
-      const language = langMatch && langMatch[1] ? langMatch[1].toLowerCase() : 'plaintext';
-      const codeLines: string[] = [];
-      i++; // Move past the opening ```
-      while (i < lines.length && !lines[i].startsWith('```')) {
-        codeLines.push(lines[i]);
-        i++;
-      }
-      elements.push({
-        type: 'code',
-        language,
-        code: codeLines.join('\n'),
-      });
-      if (i < lines.length && lines[i].startsWith('```')) {
-        i++; // Skip closing ```
-      }
-      continue;
-    }
-
-    // Blockquotes
-    if (line.startsWith('> ')) {
-      const blockquoteLines: string[] = [];
-      while (i < lines.length && lines[i].startsWith('> ')) {
-        blockquoteLines.push(lines[i].substring(2));
-        i++;
-      }
-      // Join lines with newline, as blockquotes can span multiple lines that should be one content block
-      elements.push({
-        type: 'blockquote',
-        content: blockquoteLines.join('\n'),
-      });
-      // `i` is already advanced past the blockquote lines
-      continue;
-    }
-
-    // Unordered Lists
-    if (line.startsWith('- ') || line.startsWith('* ')) {
-      const items: string[] = [];
-      while (i < lines.length && (lines[i].startsWith('- ') || lines[i].startsWith('* '))) {
-        items.push(lines[i].substring(2));
-        i++;
-      }
-      elements.push({ type: 'list', ordered: false, items });
-      // `i` is already advanced past the list items
-      continue;
-    }
-
-    // Ordered Lists
-    const orderedListMatch = line.match(/^(\d+)\. (.*)/);
-    if (orderedListMatch) {
-      const items: string[] = [];
-      let expectedNum = parseInt(orderedListMatch[1]);
-      while (i < lines.length) {
-        const currentItemMatch = lines[i].match(/^(\d+)\. (.*)/);
-        if (currentItemMatch && parseInt(currentItemMatch[1]) === expectedNum) {
-          items.push(currentItemMatch[2]);
-          expectedNum++;
-          i++;
-        } else {
-          break; // End of the current ordered list
-        }
-      }
-      elements.push({ type: 'list', ordered: true, items });
-      // `i` is already advanced past the list items
-      continue;
-    }
-    
-    // Paragraphs (and handling blank lines between elements)
-    if (line.trim() !== '') {
-      const paragraphLines: string[] = [];
-      while (i < lines.length && lines[i].trim() !== '') {
-        // Check if the current line starts a new block element type before adding to paragraph
-        if (
-          lines[i].startsWith('#') || 
-          lines[i].match(/^(\-\-\-|\*\*\*|___)$/) ||
-          lines[i].startsWith('```') ||
-          lines[i].startsWith('> ') ||
-          lines[i].startsWith('- ') || lines[i].startsWith('* ') ||
-          lines[i].match(/^(\d+)\. /)
-        ) {
-          break; 
-        }
-        paragraphLines.push(lines[i]);
-        i++;
-      }
-      if (paragraphLines.length > 0) {
-        elements.push({ type: 'paragraph', content: paragraphLines.join('\n') });
-      }
-      // `i` is already advanced past the paragraph lines
-      continue;
-    }
-
-    // If it's a blank line and not part of any specific block, just skip it
-    i++;
-  }
-
-  return elements;
-};
-
 const extractSection = (content: string, startMarker: string, endMarker: string = ''): string => {
   let startIndex = content.indexOf(startMarker);
   if (startIndex === -1) return '';
@@ -478,7 +345,7 @@ const processMarkdownFile = (fileName: string, content: string): Topic => {
     id,
     title,
     path,
-    explanation: parseMarkdownToStructuredData(explanationContent),
+    explanation: explanationContent,
     codeExample,
     interactiveExample,
     exercise,
