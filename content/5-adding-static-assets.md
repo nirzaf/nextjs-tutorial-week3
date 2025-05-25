@@ -121,15 +121,17 @@ Then you can use external images:
 }
 ```
 
-3. Import the CSS file in your `_app.js`:
+3. Import the CSS file in your `_app.tsx`:
 
-```javascript
-// pages/_app.js
+```typescript
+// pages/_app.tsx
+import React from 'react';
+import type { AppProps } from 'next/app';
 import '../styles/fonts.css';
 
-function MyApp({ Component, pageProps }) {
+const MyApp: React.FC<AppProps> = ({ Component, pageProps }) => {
   return <Component {...pageProps} />;
-}
+};
 
 export default MyApp;
 ```
@@ -147,8 +149,10 @@ body {
 
 Next.js 13 introduced a new Fonts API for easy integration with Google Fonts:
 
-```javascript
-// pages/_app.js
+```typescript
+// pages/_app.tsx
+import React from 'react';
+import type { AppProps } from 'next/app';
 import { Inter } from 'next/font/google';
 
 const inter = Inter({
@@ -156,7 +160,7 @@ const inter = Inter({
   display: 'swap',
 });
 
-function MyApp({ Component, pageProps }) {
+const MyApp: React.FC<AppProps> = ({ Component, pageProps }) => {
   return (
     <div className={inter.className}>
       <Component {...pageProps} />
@@ -180,7 +184,7 @@ You can add any other static files to the `public` directory:
 
 Access these files directly from the root URL:
 
-```javascript
+```tsx
 <a href="/resume.pdf" download>Download Resume</a>
 ```
 

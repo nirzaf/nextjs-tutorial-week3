@@ -152,21 +152,36 @@ export default function handler(
 
 Similar to pages, API routes can be dynamic:
 
-```javascript
-// pages/api/users/[id].js
-export default function handler(req, res) {
+```typescript
+// pages/api/users/[id].ts
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+type UserResponse = {
+  id: string;
+  name?: string;
+  message?: string;
+};
+
+type ErrorResponse = {
+  message: string;
+};
+
+export default function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<UserResponse | ErrorResponse>
+) {
   const { id } = req.query;
   
   switch (req.method) {
     case 'GET':
       // Get user by ID
-      return res.status(200).json({ id, name: `User ${id}` });
+      return res.status(200).json({ id: id as string, name: `User ${id}` });
     case 'PUT':
       // Update user by ID
-      return res.status(200).json({ id, message: `User ${id} updated` });
+      return res.status(200).json({ id: id as string, message: `User ${id} updated` });
     case 'DELETE':
       // Delete user by ID
-      return res.status(200).json({ id, message: `User ${id} deleted` });
+      return res.status(200).json({ id: id as string, message: `User ${id} deleted` });
     default:
       return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
@@ -177,10 +192,23 @@ export default function handler(req, res) {
 
 You can create middleware to handle common functionality across multiple API routes:
 
-```javascript
-// middleware/withAuth.js
-export function withAuth(handler) {
-  return async (req, res) => {
+```typescript
+// middleware/withAuth.ts
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+type ApiHandler = (
+  req: NextApiRequest,
+  res: NextApiResponse
+) => Promise<void> | void;
+
+// This would be your actual token validation function
+const isValidToken = (token: string): boolean => {
+  // Implementation details
+  return token.startsWith('Bearer '); // Simplified example
+};
+
+export function withAuth(handler: ApiHandler) {
+  return async (req: NextApiRequest, res: NextApiResponse) => {
     // Check for authentication token
     const token = req.headers.authorization;
     
@@ -194,10 +222,18 @@ export function withAuth(handler) {
 }
 
 // Usage in an API route
-// pages/api/protected.js
+// pages/api/protected.ts
+import type { NextApiRequest, NextApiResponse } from 'next';
 import { withAuth } from '../../middleware/withAuth';
 
-function protectedHandler(req, res) {
+type ProtectedData = {
+  message: string;
+};
+
+function protectedHandler(
+  req: NextApiRequest,
+  res: NextApiResponse<ProtectedData>
+) {
   res.status(200).json({ message: 'This is protected data' });
 }
 
@@ -208,18 +244,23 @@ export default withAuth(protectedHandler);
 
 API routes are perfect for interacting with databases:
 
-```javascript
-// lib/db.js
-import { MongoClient } from 'mongodb';
+```typescript
+// lib/db.ts
+import { MongoClient, MongoClientOptions } from 'mongodb';
 
-const uri = process.env.MONGODB_URI;
-const options = {
+// Add global type for the MongoDB client promise
+declare global {
+  var _mongoClientPromise: Promise<MongoClient>;
+}
+
+const uri = process.env.MONGODB_URI as string;
+const options: MongoClientOptions = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 };
 
-let client;
-let clientPromise;
+let client: MongoClient;
+let clientPromise: Promise<MongoClient>;
 
 if (!process.env.MONGODB_URI) {
   throw new Error('Please add your MongoDB URI to .env.local');
@@ -241,19 +282,31 @@ if (process.env.NODE_ENV === 'development') {
 
 export default clientPromise;
 
-// pages/api/users/index.js
+// pages/api/users/index.ts
 import clientPromise from '../../../lib/db';
 
-export default async function handler(req, res) {
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+type User = {
+  _id?: string;
+  name: string;
+  email: string;
+  // Add other user properties
+};
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   const client = await clientPromise;
   const db = client.db('myDatabase');
   
   switch (req.method) {
     case 'GET':
       const users = await db.collection('users').find({}).toArray();
-      return res.status(200).json(users);
+      return res.status(200).json(users as User[]);
     case 'POST':
-      const result = await db.collection('users').insertOne(req.body);
+      const result = await db.collection('users').insertOne(req.body as User);
       return res.status(201).json(result);
     default:
       return res.status(405).end(`Method ${req.method} Not Allowed`);
@@ -265,16 +318,38 @@ export default async function handler(req, res) {
 
 Proper error handling is important in API routes:
 
-```javascript
-// pages/api/example.js
-export default async function handler(req, res) {
+```typescript
+// pages/api/example.ts
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+type Data = {
+  // Define your data structure
+  [key: string]: any;
+};
+
+type ErrorResponse = {
+  error: boolean;
+  message: string;
+  statusCode: number;
+};
+
+// This would be your actual data fetching function
+const fetchSomeData = async (): Promise<Data> => {
+  // Implementation details
+  return { success: true, data: 'Some data' };
+};
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<Data | ErrorResponse>
+) {
   try {
     // Potentially risky operation
     const data = await fetchSomeData();
     
     // Success response
     res.status(200).json(data);
-  } catch (error) {
+  } catch (error: any) {
     console.error('API error:', error);
     
     // Determine the appropriate status code
@@ -293,8 +368,9 @@ export default async function handler(req, res) {
 
 If your API needs to be accessed from different domains, you can configure CORS:
 
-```javascript
-// pages/api/cors-example.js
+```typescript
+// pages/api/cors-example.ts
+import type { NextApiRequest, NextApiResponse } from 'next';
 import Cors from 'cors';
 
 // Initialize the CORS middleware
@@ -304,9 +380,13 @@ const cors = Cors({
 });
 
 // Helper function to run middleware
-function runMiddleware(req, res, fn) {
+function runMiddleware(
+  req: NextApiRequest,
+  res: NextApiResponse,
+  fn: Function
+) {
   return new Promise((resolve, reject) => {
-    fn(req, res, (result) => {
+    fn(req, res, (result: Error | unknown) => {
       if (result instanceof Error) {
         return reject(result);
       }
