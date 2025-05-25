@@ -1,6 +1,8 @@
 
 import React from 'react';
-import { Topic, ContentElement } from '../types';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { Topic } from '../types';
 import { CodeBlock } from './CodeBlock';
 import { QuizComponent } from './QuizComponent';
 import { ExerciseComponent } from './ExerciseComponent';
@@ -9,6 +11,37 @@ import { InteractiveExample } from './InteractiveExample';
 interface TopicViewProps {
   topic: Topic;
 }
+
+// Type for the props of CodeBlockWrapper, especially for the 'node' prop.
+// This might need adjustment based on actual props passed by ReactMarkdown.
+// Using 'any' for 'node' initially to avoid deep type issues.
+interface CodeBlockWrapperProps {
+  node?: any; // Or a more specific type from ReactMarkdown if known
+  inline?: boolean;
+  className?: string;
+  children?: React.ReactNode;
+}
+
+const CodeBlockWrapper: React.FC<CodeBlockWrapperProps> = ({ node, inline, className, children, ...props }) => {
+  if (inline) {
+    return (
+      <code className="bg-slate-700 p-1 rounded text-sm text-emerald-300">
+        {String(children).trim()}
+      </code>
+    );
+  }
+
+  const match = /language-(\w+)/.exec(className || '');
+  const lang = match && match[1] ? match[1] : '';
+
+  return (
+    <CodeBlock
+      language={lang}
+      code={String(children).trim()}
+      {...props} // Pass down other props if any
+    />
+  );
+};
 
 export const TopicView: React.FC<TopicViewProps> = ({ topic }) => {
   return (
@@ -22,47 +55,9 @@ export const TopicView: React.FC<TopicViewProps> = ({ topic }) => {
           <InfoIcon className="w-7 h-7 mr-3 text-sky-500" />
           Explanation
         </h2>
-        <div className="space-y-4">
-          {topic.explanation.map((element, index) => {
-            switch (element.type) {
-              case 'paragraph':
-                return <p key={index} className="mb-4">{element.content}</p>;
-              case 'code':
-                return <CodeBlock key={index} code={element.code} language={element.language} />;
-              case 'header':
-                const HeaderTag = `h${element.level}` as keyof JSX.IntrinsicElements;
-                // Basic styling, assuming prose handles most of it. Add more classes if needed.
-                const headerClasses = {
-                  1: "text-3xl font-bold mb-4 text-sky-300", // Was prose-h1:text-sky-400
-                  2: "text-2xl font-bold mb-3 text-sky-400", // Was prose-h2:text-sky-500
-                  3: "text-xl font-semibold mb-2 text-sky-500", // Was prose-h3:text-sky-600
-                  4: "text-lg font-semibold mb-2",
-                  5: "text-base font-semibold mb-1",
-                  6: "text-sm font-semibold mb-1",
-                };
-                return <HeaderTag key={index} className={headerClasses[element.level]}>{element.content}</HeaderTag>;
-              case 'list':
-                const ListTag = element.ordered ? 'ol' : 'ul';
-                // Tailwind prose classes should handle list-disc/list-decimal and padding
-                return (
-                  <ListTag key={index} className={element.ordered ? "list-decimal pl-5 mb-4" : "list-disc pl-5 mb-4"}>
-                    {element.items.map((item, itemIndex) => (
-                      <li key={itemIndex}>{item}</li>
-                    ))}
-                  </ListTag>
-                );
-              case 'blockquote':
-                // Tailwind prose should handle styling for blockquotes
-                return <blockquote key={index} className="border-l-4 border-slate-500 pl-4 italic my-4"><p>{element.content}</p></blockquote>;
-              case 'hr':
-                return <hr key={index} className="my-8 border-slate-700" />; // Increased margin for HR
-              default:
-                // Ensure exhaustiveness or handle unknown types
-                const _exhaustiveCheck: never = element;
-                return null;
-            }
-          })}
-        </div>
+        <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ code: CodeBlockWrapper }}>
+          {topic.explanation}
+        </ReactMarkdown>
       </section>
 
       {topic.codeExample.code && (
