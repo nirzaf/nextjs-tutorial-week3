@@ -22,11 +22,51 @@ export interface Exercise {
   }[];
 }
 
+export interface ParagraphElement {
+  type: 'paragraph';
+  content: string; // Contains raw markdown for inline elements initially
+}
+
+export interface CodeElement {
+  type: 'code';
+  language: string;
+  code: string;
+}
+
+export interface HeaderElement {
+  type: 'header';
+  level: 1 | 2 | 3 | 4 | 5 | 6;
+  content: string;
+}
+
+export interface ListElement {
+  type: 'list';
+  ordered: boolean;
+  items: string[]; // Items are strings, may contain raw inline markdown
+}
+
+export interface BlockquoteElement {
+  type: 'blockquote';
+  content: string; // May contain raw inline markdown
+}
+
+export interface HorizontalRuleElement {
+  type: 'hr';
+}
+
+export type ContentElement =
+  | ParagraphElement
+  | CodeElement
+  | HeaderElement
+  | ListElement
+  | BlockquoteElement
+  | HorizontalRuleElement;
+
 export interface Topic {
   id: string;
   title: string;
   path: string;
-  explanation: string;
+  explanation: ContentElement[];
   codeExample: {
     description?: string;
     code: string;

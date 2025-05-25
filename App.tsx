@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { HashRouter, Routes, Route, useParams, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, useParams, Navigate, Link } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { TopicView } from './components/TopicView';
 import { TOPICS_DATA, APP_TITLE } from './constants';
-import { Topic } from './types';
+import { Topic, ContentElement } from './types'; // Added ContentElement
+import { CodeBlock } from './components/CodeBlock'; // Moved CodeBlock import to top
 
 const App: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,9 +23,14 @@ const App: React.FC = () => {
     // Search in keywords
     if (topic.keywords.some(keyword => keyword.toLowerCase().includes(searchTermLower))) return true;
     
-    // Search in explanation (strip HTML tags first)
-    const explanationText = topic.explanation.replace(/<[^>]*>/g, '');
-    if (explanationText.toLowerCase().includes(searchTermLower)) return true;
+    // Search in explanation (now an array of ContentElement)
+    const explanationText = topic.explanation.map(element => {
+      if ('content' in element) return element.content;
+      if (element.type === 'code') return element.code;
+      if (element.type === 'list') return element.items.join(' ');
+      return '';
+    }).join(' ').toLowerCase();
+    if (explanationText.includes(searchTermLower)) return true;
     
     return false;
   });
@@ -115,7 +121,43 @@ const WelcomePage: React.FC = () => {
   return (
      <div className="prose prose-invert max-w-none prose-h1:text-sky-400 prose-h2:text-sky-500 prose-a:text-sky-400 hover:prose-a:text-sky-300">
         <h1 className="text-4xl font-bold mb-6 text-sky-300">{introTopic.title}</h1>
-        <div dangerouslySetInnerHTML={{ __html: introTopic.explanation }} />
+        <div className="space-y-4">
+          {introTopic.explanation.map((element, index) => {
+            switch (element.type) {
+              case 'paragraph':
+                return <p key={index} className="mb-4">{element.content}</p>;
+              case 'code':
+                return <CodeBlock key={index} code={element.code} language={element.language} />;
+              case 'header':
+                const HeaderTag = `h${element.level}` as keyof JSX.IntrinsicElements;
+                const headerClasses: Record<number, string> = {
+                  1: "text-3xl font-bold mb-4 text-sky-300",
+                  2: "text-2xl font-bold mb-3 text-sky-400",
+                  3: "text-xl font-semibold mb-2 text-sky-500",
+                  4: "text-lg font-semibold mb-2",
+                  5: "text-base font-semibold mb-1",
+                  6: "text-sm font-semibold mb-1",
+                };
+                return <HeaderTag key={index} className={headerClasses[element.level] || ''}>{element.content}</HeaderTag>;
+              case 'list':
+                const ListTag = element.ordered ? 'ol' : 'ul';
+                return (
+                  <ListTag key={index} className={element.ordered ? "list-decimal pl-5 mb-4" : "list-disc pl-5 mb-4"}>
+                    {element.items.map((item, itemIndex) => (
+                      <li key={itemIndex}>{item}</li>
+                    ))}
+                  </ListTag>
+                );
+              case 'blockquote':
+                return <blockquote key={index} className="border-l-4 border-slate-500 pl-4 italic my-4"><p>{element.content}</p></blockquote>;
+              case 'hr':
+                return <hr key={index} className="my-6 border-slate-700" />;
+              default:
+                const _exhaustiveCheck: never = element;
+                return null;
+            }
+          })}
+        </div>
         {introTopic.codeExample.code && (
             <div className="mt-6">
                 <h3 className="text-2xl font-semibold mb-2 text-sky-500">Quick Example</h3>
@@ -148,10 +190,7 @@ const TopicWrapper: React.FC = () => {
   return <TopicView topic={topic} />;
 };
 
-// A helper link component for completeness, though not strictly needed for TopicWrapper
-import { Link } from 'react-router-dom';
-import { CodeBlock } from './components/CodeBlock';
-
+// Removed redundant Link and CodeBlock imports from here as they are at the top now
 
 export default App;
     
