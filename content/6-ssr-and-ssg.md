@@ -75,7 +75,7 @@ const Blog: React.FC<BlogProps> = ({ posts }) => {
 export const getStaticProps: GetStaticProps<BlogProps> = async () => {
   // Fetch data from an API
   const res = await fetch('https://api.example.com/posts');
-  const posts = await res.json();
+  const posts = await res.json(); // posts: Post[]
 
   // Pass data to the page via props
   return {
@@ -122,7 +122,7 @@ const Post: React.FC<PostProps> = ({ post }) => {
 // Specify which paths to pre-render
 export const getStaticPaths: GetStaticPaths = async () => {
   const res = await fetch('https://api.example.com/posts');
-  const posts = await res.json();
+  const posts = await res.json(); // posts: Post[]
 
   // Generate paths for each post
   const paths = posts.map((post) => ({
@@ -141,7 +141,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 // Fetch data for each page
 export const getStaticProps: GetStaticProps<PostProps, { id: string }> = async ({ params }) => {
   const res = await fetch(`https://api.example.com/posts/${params?.id}`);
-  const post = await res.json();
+  const post = await res.json(); // post: Post
 
   return {
     props: {
@@ -255,7 +255,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ product }) => {
 
 export const getStaticProps: GetStaticProps<ProductPageProps, { id: string }> = async ({ params }) => {
   const res = await fetch(`https://api.example.com/products/${params?.id}`);
-  const product = await res.json();
+  const product = await res.json(); // product: Product
 
   return {
     props: {
@@ -282,7 +282,7 @@ export const getStaticProps: GetStaticProps<ProductPageProps, { id: string }> = 
 
 You've learned about:
 
-- Different rendering methods in Next.js
+- Different rendering methods in Next.js (TypeScript examples)
 - Implementing Static Site Generation with `getStaticProps`
 - Handling dynamic routes with `getStaticPaths`
 - Server-Side Rendering with `getServerSideProps`

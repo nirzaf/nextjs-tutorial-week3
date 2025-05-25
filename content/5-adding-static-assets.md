@@ -76,7 +76,7 @@ The `priority` attribute is used for images that should be preloaded, such as th
 
 ### Using External Images
 
-To use external images with the `Image` component, you need to configure the domains in `next.config.js`:
+To use external images with the `Image` component, you need to configure the domains in `next.config.ts`:
 
 ```typescript
 // next.config.ts

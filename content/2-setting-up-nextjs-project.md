@@ -38,12 +38,12 @@ my-next-app/
 ├── public/          # Static files (images, fonts, etc.)
 ├── pages/           # Pages and API routes
 │   ├── api/         # API endpoints
-│   ├── _app.js      # Custom App component
-│   └── index.js     # Home page
+│   ├── _app.tsx      # Custom App component
+│   └── index.tsx     # Home page
 ├── styles/          # CSS files
 ├── .eslintrc.json   # ESLint configuration
 ├── .gitignore       # Git ignore file
-├── next.config.js   # Next.js configuration
+├── next.config.ts   # Next.js configuration
 ├── package.json     # Project dependencies
 └── README.md        # Project documentation
 ```
@@ -58,7 +58,7 @@ my-next-app/
 
 ## Configuration Options
 
-Next.js is designed to work out of the box with minimal configuration, but you can customize it using the `next.config.js` file:
+Next.js is designed to work out of the box with minimal configuration, but you can customize it using the `next.config.ts` file:
 
 ```typescript
 // next.config.ts
