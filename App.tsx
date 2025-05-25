@@ -84,7 +84,7 @@ const App: React.FC = () => {
         </header>
 
         <div className="flex flex-1 container mx-auto mt-4 overflow-hidden">
-          <aside className="w-1/4 p-4 space-y-4 bg-slate-800/50 backdrop-blur-sm rounded-lg shadow-md overflow-y-auto mr-4 max-h-[calc(100vh-120px)]">
+          <aside className="w-1/5 p-4 space-y-4 bg-slate-800/50 backdrop-blur-sm rounded-lg shadow-md overflow-y-auto mr-4 max-h-[calc(100vh-120px)]">
             {filteredTopics.length < TOPICS_DATA.length && (
               <div className="text-sm text-sky-400 mb-2">
                 Found {filteredTopics.length} of {TOPICS_DATA.length} topics

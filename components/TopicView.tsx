@@ -68,7 +68,7 @@ export const TopicView: React.FC<TopicViewProps> = ({ topic }) => {
                 background: 'transparent',
                 fontSize: '0.875em',
                 lineHeight: '1.5'
-              }}
+              } as Record<string, string>}
               codeTagProps={{
                 style: {
                   fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
@@ -171,7 +171,7 @@ export const TopicView: React.FC<TopicViewProps> = ({ topic }) => {
   };
 
   return (
-    <article className="prose prose-invert prose-slate dark:prose-invert max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <article className="prose prose-invert prose-slate dark:prose-invert w-full max-w-none px-4 sm:px-6 lg:px-8 py-8">
       <header className="mb-10 pb-6 border-b border-slate-700/50">
         <h1 className="text-4xl font-bold text-white mb-2">{topic.title}</h1>
         {topic.keywords && topic.keywords.length > 0 && (
@@ -189,70 +189,68 @@ export const TopicView: React.FC<TopicViewProps> = ({ topic }) => {
       </header>
 
       <section id="explanation" className="mb-10">
-        <main className="lg:col-span-8 space-y-8">
-          <div className="bg-slate-800/30 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 shadow-lg">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-              <div className="flex-shrink-0 mt-1">
-                <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-sky-500/10 text-sky-400">
-                  <InfoIcon />
-                </div>
+        <div className="bg-slate-800/30 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 shadow-lg">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0">
+              <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-sky-500/10 text-sky-400">
+                <InfoIcon />
               </div>
-              <div className="flex-1 min-w-0">
-                <h2 className="text-xl font-semibold text-white mb-4">Explanation</h2>
-                <div className="prose prose-slate dark:prose-invert prose-lg max-w-none">
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    components={markdownComponents}
-                  >
-                    {topic.explanation}
-                  </ReactMarkdown>
-                </div>
+            </div>
+            <div className="flex-1">
+              <h2 className="text-xl font-semibold text-white mb-4">Explanation</h2>
+              <div className="prose prose-slate dark:prose-invert prose-lg w-full">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={markdownComponents}
+                >
+                  {topic.explanation}
+                </ReactMarkdown>
               </div>
             </div>
           </div>
-        </main>
+        </div>
       </section>
 
       {topic.codeExample?.code && (
-        <section className="bg-slate-800/30 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 shadow-lg">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div className="flex-shrink-0 mt-1">
-              <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-400">
-                <CodeIcon />
-              </div>
-            </div>
-            <div className="flex-1 min-w-0">
-              <h2 className="text-xl font-bold text-slate-200 mb-4">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-sky-400">
-                  Code Example
-                </span>
-              </h2>
-              <div className="code-block rounded-lg overflow-hidden border border-slate-700/50">
-                <div className="code-block-header">
-                  <span className="text-xs font-mono text-slate-400">
-                    {topic.codeExample && 'language' in topic.codeExample ? String(topic.codeExample.language) : 'javascript'}
-                  </span>
+        <section className="mb-10">
+          <div className="bg-slate-800/30 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 shadow-lg">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-400">
+                  <CodeIcon />
                 </div>
-                <div className="p-0 overflow-x-auto">
-                  <SyntaxHighlighter
-                    style={vscDarkPlus}
-                    language={topic.codeExample && 'language' in topic.codeExample ? String(topic.codeExample.language) : 'javascript'}
-                    PreTag="div"
-                    className="!bg-transparent !p-4 !m-0 text-sm sm:text-base"
-                    customStyle={{
-                      margin: '0',
-                      background: 'transparent',
-                      fontSize: '0.875em',
-                      lineHeight: '1.5'
-                    }}
-                    codeTagProps={{
-                      style: {
-                        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-                      },
-                    }}
-                  >
-                    {topic.codeExample.code}
-                  </SyntaxHighlighter>
+              </div>
+              <div className="flex-1">
+                <h2 className="text-xl font-semibold text-white mb-4">
+                  Code Example
+                </h2>
+                <div className="code-block rounded-lg overflow-hidden border border-slate-700/50">
+                  <div className="code-block-header bg-slate-800/50 px-4 py-2 border-b border-slate-700/50">
+                    <span className="text-xs font-mono text-slate-400">
+                      {topic.codeExample && 'language' in topic.codeExample ? String(topic.codeExample.language) : 'javascript'}
+                    </span>
+                  </div>
+                  <div className="p-0 overflow-x-auto">
+                    <SyntaxHighlighter
+                      style={vscDarkPlus}
+                      language={topic.codeExample && 'language' in topic.codeExample ? String(topic.codeExample.language) : 'javascript'}
+                      PreTag="div"
+                      className="!bg-transparent !p-4 !m-0 text-sm sm:text-base"
+                      customStyle={{
+                        margin: '0',
+                        background: 'transparent',
+                        fontSize: '0.875em',
+                        lineHeight: '1.5'
+                      } as Record<string, string>}
+                      codeTagProps={{
+                        style: {
+                          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+                        },
+                      }}
+                    >
+                      {topic.codeExample.code}
+                    </SyntaxHighlighter>
+                  </div>
                 </div>
               </div>
             </div>
