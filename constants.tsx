@@ -1,6 +1,5 @@
 import { Topic } from './types';
 
-// Utility to convert a subset of markdown to basic HTML for explanation
 const markdownToHtml = (markdown: string): string => {
   let html = markdown
     .replace(/^### (.*$)/gim, '<h3 class="text-xl font-semibold mb-2 text-sky-700">$1</h3>')
@@ -27,14 +26,10 @@ const markdownToHtml = (markdown: string): string => {
   html = html.replace(/<\/ul>\s*<ul/g, '');
 
 
-  // Handle blockquotes
+
   html = html.replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-gray-300 pl-4 italic my-4">$1</blockquote>');
 
-  // Handle table markdown (very basic, might not render perfectly without proper parser)
-  // For simplicity, we'll let table markdown pass through as is, as a robust parser is complex.
-  // The user might need a markdown renderer on the frontend for tables.
 
-  // Newline to paragraph conversion
   html = html.split('\n\n').map(paragraph => {
       // Don't wrap if it's already a block element or code block
       if (paragraph.startsWith('<h') || paragraph.startsWith('<ul') || paragraph.startsWith('<blockquote') || paragraph.startsWith('<pre') || paragraph.startsWith('<table')) {
@@ -47,7 +42,7 @@ const markdownToHtml = (markdown: string): string => {
       return `<p class="mb-4">${paragraph}</p>`;
   }).join('');
 
-  // Extract code blocks and convert to <pre><code>
+
   html = html.replace(/```(?:javascript|js|typescript|ts|bash|toml|dockerfile|css|html)\n([\s\S]*?)\n```/g, (match, p1) => {
     const parts = match.split('\n');
     const lang = parts[0].replace('```', '').trim();
@@ -55,7 +50,7 @@ const markdownToHtml = (markdown: string): string => {
     return `<pre><code class="language-${lang}">${code}</code></pre>`;
   });
 
-  // Basic filter for empty paragraphs after processing
+
   html = html.replace(/<p class="mb-4">\s*<\/p>/g, '');
   html = html.replace(/<ul class="list-disc list-inside mb-4 space-y-1">\s*<\/ul>/g, '');
   html = html.replace(/<hr class="my-4" \/>\s*<h/g, '<hr class="my-4" /><h'); // Fixes for HR + H
@@ -63,7 +58,7 @@ const markdownToHtml = (markdown: string): string => {
   return html.trim();
 };
 
-// Helper function to extract content between two markers (headings, etc.)
+
 const extractSection = (content: string, startMarker: string, endMarker: string = ''): string => {
   let startIndex = content.indexOf(startMarker);
   if (startIndex === -1) return '';
@@ -77,13 +72,13 @@ const extractSection = (content: string, startMarker: string, endMarker: string 
   return content.substring(startIndex, endIndex).trim();
 };
 
-// Helper to get all code blocks
+
 const getAllCodeBlocks = (content: string) => {
   const matches = content.matchAll(/```(?:javascript|js|typescript|ts|bash|toml|dockerfile|css|html)\n([\s\S]*?)\n```/g);
   return Array.from(matches).map(match => match[1].trim());
 };
 
-// Helper to extract question and task from "Questions & Tasks" section
+
 const extractQuestionAndTask = (content: string) => {
   let quizQuestion = '';
   let exerciseTasks: { task: string; code: string; hint: string }[] = [];
@@ -125,7 +120,7 @@ const extractQuestionAndTask = (content: string) => {
       currentTaskText = line.substring('Task:'.length).trim();
       // If task has text directly on same line
       if (currentTaskText && !currentTaskText.includes('```')) {
-        // If there's no code block immediately after, it might be a text-only task.
+        // If there's no code block immediately after, it's a text-only task.
         const nextLineIndex = lines.indexOf(line) + 1;
         if (nextLineIndex < lines.length && !lines[nextLineIndex].startsWith('```')) {
             exerciseTasks.push({ task: currentTaskText, code: '', hint: 'Review the section\'s content for guidance.' });
@@ -148,7 +143,7 @@ const extractQuestionAndTask = (content: string) => {
   return { quizQuestion, exerciseTasks };
 };
 
-// Helper to make quiz options consistent and somewhat diverse
+
 const generateQuizOptions = (correctText: string, topicTitle: string) => {
   const options = [
     { id: "a", text: correctText },
@@ -156,7 +151,7 @@ const generateQuizOptions = (correctText: string, topicTitle: string) => {
     { id: "c", text: `Another incorrect option related to ${topicTitle} (C)` },
     { id: "d", text: `A misleading option about ${topicTitle} (D)` }
   ];
-  // Shuffle to ensure the correct option is not always 'a'
+
   for (let i = options.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [options[i], options[j]] = [options[j], options[i]];
@@ -164,7 +159,7 @@ const generateQuizOptions = (correctText: string, topicTitle: string) => {
   return options;
 };
 
-// Function to process each markdown file into a Topic object
+
 const processMarkdownFile = (fileName: string, content: string): Topic => {
   const id = fileName.replace(/\.md$/, '').replace(/^\d+\-/, '').replace(/\./g, '-');
   const path = `/${id}`;
@@ -193,7 +188,7 @@ const processMarkdownFile = (fileName: string, content: string): Topic => {
 
   explanationContent = content.substring(contentStart, contentEnd).trim();
   
-  // Specific cleanup for repetitive headings like "Learning Objectives" that might be within explanationContent
+
   explanationContent = explanationContent
     .replace('---', '')
     .replace(/## \d+\. Learning Objectives/g, '')
@@ -213,7 +208,7 @@ const processMarkdownFile = (fileName: string, content: string): Topic => {
       quiz.question = quizQuestion;
       const correctOptionText = `The primary concept of ${title.split('. ')[1] || title}.`;
       quiz.options = generateQuizOptions(correctOptionText, title);
-      quiz.correctAnswerId = quiz.options.find(opt => opt.text === correctOptionText)?.id || "a";
+      quiz.correctAnswerId = quiz.options.find(opt => opt.text.includes(correctOptionText))?.id || "a"; // Use includes for safer match
       quiz.explanation = `The core idea of this section is: ${correctOptionText}. Refer back to the topic for details.`;
     }
 
@@ -309,7 +304,7 @@ const processMarkdownFile = (fileName: string, content: string): Topic => {
   };
 };
 
-// All file contents go here
+
 const readmeContent = `# Next.js Tutorial for Beginners
 
 Welcome to this comprehensive Next.js tutorial! This guide will walk you through how to get started with Next.js and explore its key features. By the end, you'll have a solid understanding of how to build fast, SEO-friendly, and production-ready web applications with Next.js.
@@ -1103,18 +1098,18 @@ export async function getStaticPaths() {
   };
 }
 
+\`\`\`typescript
 // Fetch data for each page
-export async function getStaticProps({ params }) {
-  const res = await fetch(\`https://api.example.com/posts/${params.id}\`);
+export async function getStaticProps({ params }: { params: { id: string } }) {
+  const res = await fetch('https://api.example.com/posts/' + params.id);
   const post = await res.json();
 
   return {
-    props: {
-      post,
-    },
-    revalidate: 60, // Revalidate every minute
+    props: { post },
+    revalidate: 60 // Revalidate every minute
   };
 }
+\`\`\`
 \`\`\`
 
 ## Implementing SSR with getServerSideProps
@@ -1158,22 +1153,18 @@ export async function getServerSideProps(context) {
 
 ISR allows you to update static pages after they've been built without rebuilding the entire site:
 
-\`\`\`javascript
+\`\`\`typescript
 // pages/products/[id].js
-export async function getStaticProps({ params }) {
-  const res = await fetch(\`https://api.example.com/products/${params.id}\`);
+export async function getStaticProps({ params }: { params: { id: string } }) {
+  const res = await fetch('https://api.example.com/products/' + params.id);
   const product = await res.json();
 
   return {
-    props: {
-      product,
-    },
-    // Regenerate the page:
-    // - When a request comes in
-    // - At most once every 60 seconds
-    revalidate: 60,
+    props: { product },
+    revalidate: 60 // Revalidate at most every 60 seconds
   };
 }
+\`\`\`
 \`\`\`
 
 ## Choosing the Right Rendering Method
@@ -2145,7 +2136,7 @@ export default MyApp;
 
 ---
 
-## Questions & Tasks
+## 6. Questions & Tasks
 
 1. **How do you create a typed Next.js page? List the steps and file naming conventions.**  
 2. **Why must you use \`.tsx\` for Next.js pages when using TypeScript?**  
