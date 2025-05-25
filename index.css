@@ -1,0 +1,188 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom base styles */
+@layer base {
+  body {
+    @apply bg-slate-900 text-slate-300 antialiased;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Smooth scrolling for anchor links */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Better text selection */
+  ::selection {
+    @apply bg-sky-500/20 text-sky-300;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-slate-800;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-600 rounded-full hover:bg-slate-500;
+  }
+}
+
+/* Custom components */
+@layer components {
+  .prose {
+    @apply max-w-none;
+  }
+
+  .prose :where(h1, h2, h3, h4, h5, h6):not(:first-child) {
+    @apply mt-8;
+  }
+
+  .prose :where(h1, h2, h3, h4, h5, h6) + * {
+    @apply mt-4;
+  }
+
+  /* Custom callout styles */
+  .callout {
+    @apply p-4 my-6 rounded-lg border-l-4;
+  }
+
+  .callout.info {
+    @apply border-sky-500 bg-slate-800/50;
+  }
+
+  .callout.warning {
+    @apply border-amber-500 bg-amber-900/20;
+  }
+
+  .callout.danger {
+    @apply border-rose-500 bg-rose-900/20;
+  }
+
+  .callout.success {
+    @apply border-emerald-500 bg-emerald-900/20;
+  }
+
+  /* Custom code block styles */
+  .code-block {
+    @apply relative mt-6 mb-8 rounded-lg overflow-hidden;
+  }
+
+  .code-block-header {
+    @apply flex items-center justify-between px-4 py-2 bg-slate-800 border-b border-slate-700;
+  }
+
+  .code-block-title {
+    @apply text-xs font-mono text-slate-400;
+  }
+
+  /* Custom list styles */
+  .prose ul {
+    @apply list-disc pl-5 space-y-2;
+  }
+
+  .prose ol {
+    @apply list-decimal pl-5 space-y-2;
+  }
+
+  .prose li {
+    @apply pl-2;
+  }
+
+  .prose li > p {
+    @apply mt-2 mb-2;
+  }
+
+  .prose li > :first-child {
+    @apply mt-0;
+  }
+
+  .prose li > :last-child {
+    @apply mb-0;
+  }
+
+  /* Responsive typography */
+  @screen sm {
+    .prose {
+      @apply text-base;
+    }
+  }
+
+  @screen lg {
+    .prose {
+      @apply text-lg;
+    }
+  }
+}
+
+/* Custom utilities */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  /* For custom underlines */
+  .underline-gradient {
+    @apply relative;
+  }
+
+  .underline-gradient::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-sky-500 to-emerald-500;
+  }
+
+  /* For code highlighting */
+  .code-highlight {
+    @apply relative;
+  }
+
+  .code-highlight::before {
+    content: '';
+    @apply absolute inset-y-0 left-0 w-1 bg-sky-500 rounded-full;
+  }
+}
+
+/* Animation for code blocks */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.code-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Print styles */
+@media print {
+  body {
+    @apply bg-white text-black;
+  }
+
+  .prose {
+    @apply max-w-none text-black;
+  }
+
+  .prose h1,
+  .prose h2,
+  .prose h3,
+  .prose h4,
+  .prose h5,
+  .prose h6 {
+    @apply text-black;
+  }
+
+  .no-print {
+    @apply hidden;
+  }
+}

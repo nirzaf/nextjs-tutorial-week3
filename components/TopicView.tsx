@@ -1,136 +1,305 @@
-
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Topic } from '../types';
-import { CodeBlock } from './CodeBlock';
 import { QuizComponent } from './QuizComponent';
 import { ExerciseComponent } from './ExerciseComponent';
 import { InteractiveExample } from './InteractiveExample';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import type { Components } from 'react-markdown';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+
+// Icons
+const CodeIcon: React.FC = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+  </svg>
+);
+
+const SparklesIcon: React.FC = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+  </svg>
+);
+
+const PencilIcon: React.FC = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+  </svg>
+);
+
+const QuestionMarkCircleIcon: React.FC = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 1.436-2 2.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
+
+const InfoIcon: React.FC = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
 
 interface TopicViewProps {
   topic: Topic;
 }
 
-// Type for the props of CodeBlockWrapper, especially for the 'node' prop.
-// This might need adjustment based on actual props passed by ReactMarkdown.
-// Using 'any' for 'node' initially to avoid deep type issues.
-interface CodeBlockWrapperProps {
-  node?: any; // Or a more specific type from ReactMarkdown if known
-  inline?: boolean;
-  className?: string;
-  children?: React.ReactNode;
-}
-
-const CodeBlockWrapper: React.FC<CodeBlockWrapperProps> = ({ node, inline, className, children, ...props }) => {
-  if (inline) {
-    return (
-      <code className="bg-slate-700 p-1 rounded text-sm text-emerald-300">
-        {String(children).trim()}
-      </code>
-    );
-  }
-
-  const match = /language-(\w+)/.exec(className || '');
-  const lang = match && match[1] ? match[1] : '';
-
-  return (
-    <CodeBlock
-      language={lang}
-      code={String(children).trim()}
-      {...props} // Pass down other props if any
-    />
-  );
-};
-
 export const TopicView: React.FC<TopicViewProps> = ({ topic }) => {
+  // Define components for ReactMarkdown with proper type annotations
+  const markdownComponents: Components = {
+    code: ({ className, children, ...props }) => {
+      const match = /language-(\w+)/.exec(className || '');
+      const isInline = !className?.includes('language-');
+      return !isInline ? (
+        <div className="code-block my-6 rounded-lg overflow-hidden border border-slate-700/50">
+          <div className="code-block-header flex justify-between items-center bg-slate-800/50 px-4 py-2 border-b border-slate-700/50">
+            <span className="text-xs font-mono text-slate-400">
+              {match?.[1] || 'code'}
+            </span>
+          </div>
+          <div className="p-0 overflow-x-auto">
+            <SyntaxHighlighter
+              style={vscDarkPlus}
+              language={match?.[1] || 'text'}
+              PreTag="div"
+              className="!bg-transparent !p-4 !m-0 text-sm sm:text-base"
+              customStyle={{
+                margin: '0',
+                background: 'transparent',
+                fontSize: '0.875em',
+                lineHeight: '1.5'
+              }}
+              codeTagProps={{
+                style: {
+                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+                },
+              }}
+              {...props}
+            >
+              {String(children).replace(/\n$/, '')}
+            </SyntaxHighlighter>
+          </div>
+        </div>
+      ) : (
+        <code className="bg-slate-700/50 px-1.5 py-0.5 rounded text-sm font-mono text-emerald-300">
+          {children}
+        </code>
+      );
+    },
+    a: ({ node, href, children, ...props }) => (
+      <a
+        href={href}
+        className="text-emerald-400 hover:text-emerald-300 underline underline-offset-4 transition-colors"
+        target="_blank"
+        rel="noopener noreferrer"
+        {...props}
+      >
+        {children}
+      </a>
+    ),
+    h1: ({ children, ...props }) => (
+      <h1 className="text-4xl font-bold text-white mb-2" {...props}>{children}</h1>
+    ),
+    h2: ({ node, children, ...props }) => (
+      <h2 className="text-2xl font-bold text-white mt-8 mb-3" {...props}>
+        {children}
+      </h2>
+    ),
+    h3: ({ node, children, ...props }) => (
+      <h3 className="text-xl font-bold text-white mt-6 mb-2" {...props}>
+        {children}
+      </h3>
+    ),
+    p: ({ node, children, ...props }) => (
+      <p className="text-slate-300 mb-4 leading-relaxed" {...props}>
+        {children}
+      </p>
+    ),
+    ul: ({ node, children, ...props }) => (
+      <ul className="list-disc pl-6 mb-4 space-y-2" {...props}>
+        {children}
+      </ul>
+    ),
+    ol: ({ node, children, ...props }) => (
+      <ol className="list-decimal pl-6 mb-4 space-y-2" {...props}>
+        {children}
+      </ol>
+    ),
+    li: ({ node, children, ...props }) => (
+      <li className="text-slate-300" {...props}>
+        {children}
+      </li>
+    ),
+    blockquote: ({ node, children, ...props }) => (
+      <blockquote
+        className="border-l-4 border-emerald-500 pl-4 py-1 my-4 text-slate-300 italic"
+        {...props}
+      >
+        {children}
+      </blockquote>
+    ),
+    table: ({ node, children, ...props }) => (
+      <div className="overflow-x-auto my-4">
+        <table className="min-w-full divide-y divide-slate-700" {...props}>
+          {children}
+        </table>
+      </div>
+    ),
+    thead: ({ node, children, ...props }) => (
+      <thead className="bg-slate-800/50" {...props}>
+        {children}
+      </thead>
+    ),
+    tbody: ({ node, children, ...props }) => (
+      <tbody className="divide-y divide-slate-700" {...props}>
+        {children}
+      </tbody>
+    ),
+    th: ({ node, children, ...props }) => (
+      <th
+        className="px-4 py-2 text-left text-xs font-medium text-slate-300 uppercase tracking-wider"
+        {...props}
+      >
+        {children}
+      </th>
+    ),
+    td: ({ node, children, ...props }) => (
+      <td className="px-4 py-2 text-sm text-slate-300" {...props}>
+        {children}
+      </td>
+    ),
+  };
+
   return (
-    <article className="prose prose-invert max-w-none prose-h1:text-sky-400 prose-h2:text-sky-500 prose-h3:text-sky-600 prose-a:text-sky-400 hover:prose-a:text-sky-300 prose-strong:text-sky-300 prose-code:bg-slate-700 prose-code:p-1 prose-code:rounded prose-code:text-sm prose-code:text-emerald-300 prose-pre:bg-slate-900 prose-pre:p-4 prose-pre:rounded-md">
-      <header className="mb-8 pb-4 border-b border-slate-700">
-        <h1 className="text-4xl font-extrabold tracking-tight text-sky-300">{topic.title}</h1>
+    <article className="prose prose-invert prose-slate dark:prose-invert max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <header className="mb-10 pb-6 border-b border-slate-700/50">
+        <h1 className="text-4xl font-bold text-white mb-2">{topic.title}</h1>
+        {topic.keywords && topic.keywords.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {topic.keywords.map((keyword: string, index: number) => (
+              <span
+                key={index}
+                className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-slate-800 text-sky-300 border border-slate-700/50"
+              >
+                {keyword}
+              </span>
+            ))}
+          </div>
+        )}
       </header>
 
       <section id="explanation" className="mb-10">
-        <h2 className="text-3xl font-semibold mb-4 flex items-center">
-          <InfoIcon className="w-7 h-7 mr-3 text-sky-500" />
-          Explanation
-        </h2>
-        <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ code: CodeBlockWrapper }}>
-          {topic.explanation}
-        </ReactMarkdown>
+        <main className="lg:col-span-8 space-y-8">
+          <div className="bg-slate-800/30 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 shadow-lg">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              <div className="flex-shrink-0 mt-1">
+                <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-sky-500/10 text-sky-400">
+                  <InfoIcon />
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-xl font-semibold text-white mb-4">Explanation</h2>
+                <div className="prose prose-slate dark:prose-invert prose-lg max-w-none">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={markdownComponents}
+                  >
+                    {topic.explanation}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
       </section>
 
-      {topic.codeExample.code && (
-        <section id="code-example" className="mb-10">
-          <h2 className="text-3xl font-semibold mb-4 flex items-center">
-            <CodeIcon className="w-7 h-7 mr-3 text-emerald-500" />
-            Code Example
-          </h2>
-          {topic.codeExample.description && <p className="mb-3 text-lg text-gray-300">{topic.codeExample.description}</p>}
-          <CodeBlock code={topic.codeExample.code} />
-          {topic.codeExample.outputDescription && <p className="text-sm italic mt-3 text-gray-400 bg-slate-700/50 p-3 rounded-md">{topic.codeExample.outputDescription}</p>}
+      {topic.codeExample?.code && (
+        <section className="bg-slate-800/30 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 shadow-lg">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="flex-shrink-0 mt-1">
+              <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-400">
+                <CodeIcon />
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-xl font-bold text-slate-200 mb-4">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-sky-400">
+                  Code Example
+                </span>
+              </h2>
+              <div className="code-block rounded-lg overflow-hidden border border-slate-700/50">
+                <div className="code-block-header">
+                  <span className="text-xs font-mono text-slate-400">
+                    {topic.codeExample && 'language' in topic.codeExample ? String(topic.codeExample.language) : 'javascript'}
+                  </span>
+                </div>
+                <div className="p-0 overflow-x-auto">
+                  <SyntaxHighlighter
+                    style={vscDarkPlus}
+                    language={topic.codeExample && 'language' in topic.codeExample ? String(topic.codeExample.language) : 'javascript'}
+                    PreTag="div"
+                    className="!bg-transparent !p-4 !m-0 text-sm sm:text-base"
+                    customStyle={{
+                      margin: '0',
+                      background: 'transparent',
+                      fontSize: '0.875em',
+                      lineHeight: '1.5'
+                    }}
+                    codeTagProps={{
+                      style: {
+                        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+                      },
+                    }}
+                  >
+                    {topic.codeExample.code}
+                  </SyntaxHighlighter>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
       )}
 
-      <section id="interactive-example" className="mb-10">
-         <h2 className="text-3xl font-semibold mb-4 flex items-center">
-            <SparklesIcon className="w-7 h-7 mr-3 text-yellow-500" />
+      {topic.interactiveExample && (
+        <section id="interactive-example" className="mb-10">
+          <h2 className="text-3xl font-semibold mb-4 flex items-center">
+            <div className="w-7 h-7 mr-3 text-yellow-500 flex items-center justify-center">
+              <SparklesIcon />
+            </div>
             Interactive Example
-        </h2>
-        <InteractiveExample 
-          description={topic.interactiveExample.description}
-          tasks={topic.interactiveExample.tasks}
-        />
-      </section>
+          </h2>
+          <InteractiveExample
+            description={topic.interactiveExample.description}
+            tasks={topic.interactiveExample.tasks}
+          />
+        </section>
+      )}
 
-      <section id="exercise" className="mb-10">
-        <h2 className="text-3xl font-semibold mb-4 flex items-center">
-            <PencilIcon className="w-7 h-7 mr-3 text-purple-500" />
+      {topic.exercise && (
+        <section id="exercise" className="mb-10">
+          <h2 className="text-3xl font-semibold mb-4 flex items-center">
+            <div className="w-7 h-7 mr-3 text-blue-500 flex items-center justify-center">
+              <PencilIcon />
+            </div>
             Exercise
-        </h2>
-        <ExerciseComponent exercise={topic.exercise} />
-      </section>
+          </h2>
+          <ExerciseComponent exercise={topic.exercise} />
+        </section>
+      )}
 
-      <section id="quiz">
-        <h2 className="text-3xl font-semibold mb-4 flex items-center">
-            <QuestionMarkCircleIcon className="w-7 h-7 mr-3 text-red-500" />
+      {topic.quiz && (
+        <section id="quiz">
+          <h2 className="text-3xl font-semibold mb-4 flex items-center">
+            <div className="w-7 h-7 mr-3 text-purple-500 flex items-center justify-center">
+              <QuestionMarkCircleIcon />
+            </div>
             Quiz
-        </h2>
-        <QuizComponent quiz={topic.quiz} />
-      </section>
+          </h2>
+          <QuizComponent quiz={topic.quiz} />
+        </section>
+      )}
     </article>
   );
 };
 
-// SVG Icons (Heroicons)
-const InfoIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-  </svg>
-);
-
-const CodeIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
-  </svg>
-);
-
-const SparklesIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
-  <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L1.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.25 12L17 13.75l-1.25-1.75L14.25 12l1.5-1.75L17 8.5l1.25 1.75L19.75 12l-1.5 1.75z" />
-</svg>
-);
-
-const PencilIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
-  <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
-</svg>
-);
-
-const QuestionMarkCircleIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
-  <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-</svg>
-);
-
-    
+export default TopicView;
